@@ -1,0 +1,33 @@
+{
+  "values" : [ {
+    "serviceId" : "init",
+    "timestamp" : "2022-06-22T14:53:53.206948438Z"
+  }, {
+    "serviceId" : "maven-java",
+    "timestamp" : "2022-06-22T14:53:55.060838042Z"
+  }, {
+    "serviceId" : "java-base",
+    "timestamp" : "2022-06-22T14:54:01.305259368Z"
+  }, {
+    "serviceId" : "sonar-java-backend",
+    "timestamp" : "2022-06-22T14:54:02.413724199Z"
+  }, {
+    "serviceId" : "init",
+    "timestamp" : "2022-06-22T15:09:45.877363710Z"
+  }, {
+    "serviceId" : "maven-java",
+    "timestamp" : "2022-06-22T15:09:47.778586335Z"
+  }, {
+    "serviceId" : "sonar-java-backend",
+    "timestamp" : "2022-06-22T15:09:49.114946439Z"
+  }, {
+    "serviceId" : "java-base",
+    "timestamp" : "2022-06-22T15:09:50.213087082Z"
+  }, {
+    "serviceId" : "springboot",
+    "timestamp" : "2022-06-23T13:09:53.899331731Z"
+  }, {
+    "serviceId" : "springboot-tomcat",
+    "timestamp" : "2022-06-23T13:09:57.641004753Z"
+  } ]
+}

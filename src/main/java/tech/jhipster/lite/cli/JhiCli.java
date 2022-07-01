@@ -1,94 +1,100 @@
 package tech.jhipster.lite.cli;
 
-import io.github.nubesgen.cli.subcommand.*;
-import io.github.nubesgen.cli.util.Output;
 import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Model.OptionSpec;
 import picocli.CommandLine.Option;
+import tech.jhipster.lite.cli.domain.ModuleDomainService;
+import tech.jhipster.lite.cli.domain.ModuleService;
+import tech.jhipster.lite.cli.infrastructure.primary.CompletionCommand;
+import tech.jhipster.lite.cli.infrastructure.primary.HelpOptions;
+import tech.jhipster.lite.cli.infrastructure.primary.ModuleCommand;
+import tech.jhipster.lite.cli.infrastructure.primary.ModuleListCommand;
+import tech.jhipster.lite.cli.infrastructure.secondary.RestModulesRepository;
+import tech.jhipster.lite.cli.util.Commands;
+import tech.jhipster.lite.cli.util.Output;
 
-import java.nio.file.Paths;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
-@Command(name = "nubesgen", mixinStandardHelpOptions = true,
-        versionProvider = io.github.nubesgen.cli.util.VersionProvider.class,
-        description = "CLI for NubesGen.com")
+@Command(name = "jhicli", mixinStandardHelpOptions = false, description = "CLI for jhipster lite", showDefaultValues = true)
 public class JhiCli implements Callable<Integer> {
 
-    @Option(names = {"-v", "--verbose"}, description = "Print verbose output")
-    public static boolean verbose;
+  @CommandLine.Mixin
+  private HelpOptions options = new HelpOptions();
 
-    @Option(names = {"-d", "--directory"}, description = "Directory in which the CLI will be executed")
-    public static String directory;
+  @Option(names = {"-v", "--verbose"}, description = "Print verbose output", scope = CommandLine.ScopeType.INHERIT)
+  public static boolean verbose;
 
-    @Option(names = {"-x", "--development"}, description = "Development mode, this requires a local REST server running on http://127.0.0.1:8080")
-    public static boolean development;
+  @Option(names = {"-s", "--server"}, description = "server host path", scope = CommandLine.ScopeType.INHERIT)
+  public static String server = "http://localhost:7471";
 
-    @Option(names = {"-r", "--refresh-secrets"}, description = "Refresh the GitOps configuration if it already exists")
-    public static boolean refreshSecrets;
+  @CommandLine.Spec
+  private CommandSpec spec;
 
-    @Option(names = {"-n", "--no-gitops"}, description = "Do not configure GitOps")
-    public static boolean noGitops;
+  private ModuleService moduleService = new ModuleDomainService(new RestModulesRepository());
 
-    @Option(names = {"--application-insights"}, description = "Add support for Application Performance Management (APM)")
-    public static boolean applicationInsights;
+  @Override
+  public Integer call() throws Exception {
+    Output.printError("Choose a subcommand.");
+    spec.commandLine().usage(System.out);
+    return 1;
+  }
 
-    @Option(names = {"--azure-key-vault"}, description = "Add support for Azure Key Vault to store the secrets")
-    public static boolean azureKeyVault;
+  public static void main(String... args) throws IOException {
+    AnsiConsole.systemInstall();
 
-    @Option(names = {"--vnet"}, description = "Add support for VNet to secure network connections")
-    public static boolean vnet;
+    CommandLine commandLine = new JhiCli().buildCommandLine();
 
-    @Override
-    public Integer call() throws Exception {
-        int exitCode = HealthCommand.configure();
-        if (exitCode == 0) {
-            String workingDirectory = Paths.get(".").toAbsolutePath().normalize().toString();
-            if (directory != null) {
-                workingDirectory = Paths.get(directory).toAbsolutePath().normalize().toString();
-            }
-            Output.printMessage("Working directory: " + workingDirectory);
-            String projectName = ProjectnameCommand.projectName(workingDirectory);
-            ScanCommand.applicationInsights = applicationInsights;
-            ScanCommand.azureKeyVault = azureKeyVault;
-            ScanCommand.vnet = vnet;
-            String getRequest = ScanCommand.scan(workingDirectory);
-            int gitopsExitStatus = -1;
-            if (!noGitops) {
-                gitopsExitStatus = GitopsCommand.gitops(projectName, refreshSecrets);
-                if (gitopsExitStatus == 0) {
-                    getRequest += "&gitops=true";
-                }
-            }
-            int downloadExitStatus = DownloadCommand.download(workingDirectory, projectName, getRequest);
-            if (downloadExitStatus != 0) {
-                Output.printError("NubesGen configuration failed! The configuration couldn't be downloaded from the server.");
-                return downloadExitStatus;
-            }
-            Output.printTitle("NugesGen configuration finished");
-            if (gitopsExitStatus == 0) {
-                Output.printInfo("You can now save this configuration in Git:");
-                Output.printMessage("git add . && git commit -m \"Configure GitOps\" && git push");
-                Output.printInfo("To create a new environment, create a branch starting with \"env-\" and push it:");
-                Output.printMessage("git checkout -b \"env-dev\" && git push --set-upstream origin \"env-dev\"");
-            }
+    int exitCode = commandLine.execute(args);
+    AnsiConsole.systemUninstall();
+    System.exit(exitCode);
+  }
+
+  public CommandLine buildCommandLine() {
+    CommandLine commandLine = new CommandLine(this);
+
+
+    CommandSpec moduleCommand = CommandSpec.forAnnotatedObject(new ModuleCommand(moduleService));
+    moduleCommand.addSubcommand("list", CommandSpec.forAnnotatedObject(new ModuleListCommand()));
+
+    commandLine.addSubcommand(new CommandLine(moduleCommand)).addSubcommand(new CompletionCommand()).setCaseInsensitiveEnumValuesAllowed(Boolean.TRUE).setSubcommandsCaseInsensitive(Boolean.TRUE).setOptionsCaseInsensitive(Boolean.TRUE);
+
+    CommandSpec rootApplySpec = CommandSpec.create().name("apply");
+    CommandSpec rootDescribeSpec = CommandSpec.create().name("describe");
+
+    moduleService.list(server).listModule().forEach(module -> {
+      CommandSpec templateApply = Commands.getCommandApplySpec(moduleService, rootApplySpec, module);
+      CommandSpec templateDescribe = Commands.getCommandDescribeSpec(moduleService, rootDescribeSpec, module);
+
+      module.properties().forEach(p -> {
+        OptionSpec.Builder builder = OptionSpec.builder("--".concat(p.key().get().toLowerCase())).description(p.description().get().description()).paramLabel("<" + p.key().get().toLowerCase() + ">").required(p.mandatory());
+
+        switch (p.type()) {
+          case STRING -> builder.type(String.class);
+          case BOOLEAN -> builder.type(boolean.class);
+          case INTEGER -> builder.type(int.class);
         }
-        return exitCode;
-    }
 
-    public static void main(String... args) {
-        AnsiConsole.systemInstall();
-        Output.printTitle("NugesGen configuration starting");
-        int exitCode = new CommandLine(new Nubesgen())
-                .addSubcommand(new HealthCommand())
-                .addSubcommand(new ProjectnameCommand())
-                .addSubcommand(new ScanCommand())
-                .addSubcommand(new GitopsCommand())
-                .addSubcommand(new DownloadCommand())
-                .execute(args);
+        templateApply.addOption(builder.build());
+      });
 
-        AnsiConsole.systemUninstall();
-        System.exit(exitCode);
-    }
+      templateApply.addOption(OptionSpec.builder("-h", "--help").usageHelp(true).descriptionKey("helpCommand.help").description("Show usage help for the help command and exit.").build());
+      templateDescribe.addOption(OptionSpec.builder("-h", "--help").usageHelp(true).descriptionKey("helpCommand.help").description("Show usage help for the help command and exit.").build());
+
+      rootApplySpec.addSubcommand(module.slug().slug(), templateApply).usageMessage(new CommandLine.Model.UsageMessageSpec().description("Apply a module"));
+      rootDescribeSpec.addSubcommand(module.slug().slug(), templateDescribe).usageMessage(new CommandLine.Model.UsageMessageSpec().description("Describe a module"));
+    });
+
+    rootApplySpec.addOption(OptionSpec.builder("-p", "--project-path").type(String.class).required(true).paramLabel("project folder").description("Project server path.").scopeType(CommandLine.ScopeType.INHERIT).build());
+
+    moduleCommand.addSubcommand("apply", rootApplySpec);
+    moduleCommand.addSubcommand("describe", rootDescribeSpec);
+    return commandLine;
+  }
+
+
 }
 

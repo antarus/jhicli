@@ -1,0 +1,26 @@
+{
+  "name": "jhicli",
+  "devDependencies": {
+    "prettier-plugin-packagejson": "2.2.18",
+    "prettier-plugin-java": "1.6.2",
+    "prettier": "2.7.1",
+    "lint-staged": "13.0.2",
+    "husky": "8.0.1",
+    "@prettier/plugin-xml": "2.2.0"
+  },
+  "scripts": {
+    "prettier:format": "prettier --write \"{,src/**/}*.{md,json,yml,html,js,ts,tsx,css,scss,vue,java,xml}\"",
+    "prettier:check": "prettier --check \"{,src/**/}*.{md,json,yml,html,js,ts,tsx,css,scss,vue,java,xml}\"",
+    "prepare": "husky install"
+  },
+  "version": "0.0.0",
+  "private": true,
+  "description": "jhicli",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=16.13.0"
+  },
+  "cacheDirectories": [
+    "node_modules"
+  ]
+}

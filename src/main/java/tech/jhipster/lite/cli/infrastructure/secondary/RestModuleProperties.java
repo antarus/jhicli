@@ -1,15 +1,16 @@
-package tech.jhipster.lite.cli.technical.infrastructure.secondary;
+
+package tech.jhipster.lite.cli.infrastructure.secondary;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import tech.jhipster.lite.cli.error.domain.Assert;
-import tech.jhipster.lite.cli.module.domain.ModuleProperty;
+import tech.jhipster.lite.cli.domain.ModuleProperty;
 
 import java.util.Collection;
 
-record RestModuleProperties(@JsonProperty Collection<RestModuleProperty> definitions) {
+public record RestModuleProperties(@JsonProperty Collection<RestModuleProperty> definitions) {
 
-  RestModuleProperties {
+  public RestModuleProperties {
     Assert.notNull("definitions", definitions);
   }
 

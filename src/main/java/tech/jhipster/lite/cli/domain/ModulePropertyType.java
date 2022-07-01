@@ -1,4 +1,4 @@
-package tech.jhipster.lite.cli.module.domain;
+package tech.jhipster.lite.cli.domain;
 
 public enum ModulePropertyType {
   STRING,

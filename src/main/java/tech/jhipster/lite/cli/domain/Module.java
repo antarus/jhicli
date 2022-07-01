@@ -1,4 +1,4 @@
-package tech.jhipster.lite.cli.module.domain;
+package tech.jhipster.lite.cli.domain;
 
 
 import tech.jhipster.lite.cli.error.domain.Assert;

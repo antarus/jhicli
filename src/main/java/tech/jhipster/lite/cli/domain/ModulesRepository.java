@@ -1,7 +1,7 @@
-package tech.jhipster.lite.cli.module.domain;
+package tech.jhipster.lite.cli.domain;
 
 public interface ModulesRepository {
   Modules list(String server);
 
-  void apply(ModuleSlug module, ModuleToApply moduleToApply);
+  String apply(ModuleSlug module, ModuleToApply moduleToApply);
 }

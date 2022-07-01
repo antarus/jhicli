@@ -3,12 +3,9 @@ package tech.jhipster.lite.cli.infrastructure.primary;
 import picocli.CommandLine;
 
 public class ContextOptions {
-  @CommandLine.Option(
-    names = {"-h", "--help"},
-    usageHelp = true,
-    descriptionKey = "helpCommand.help",
-    description = {"Show usage help for the help command and exit."}
-  )
-  private boolean help;
+
+
+  @CommandLine.Option(names = {"-p", "--project-path"}, paramLabel = "project folder", description = "Project server path", scope = CommandLine.ScopeType.INHERIT)
+  public String project_folder;
 }
 
