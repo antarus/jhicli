@@ -1,4 +1,4 @@
-package tech.jhipster.lite.cli.infrastructure.secondary;
+package tech.jhipster.lite.cli.domain;
 
 import net.minidev.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -9,28 +9,19 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
-import static org.assertj.core.api.Assertions.*;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.*;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import tech.jhipster.lite.cli.JhiCli;
-import tech.jhipster.lite.cli.UnitTest;
-import tech.jhipster.lite.cli.domain.ModulePropertyType;
-import tech.jhipster.lite.cli.domain.ModuleSlug;
-import tech.jhipster.lite.cli.domain.ModuleToApply;
-import tech.jhipster.lite.cli.domain.Modules;
-import tech.jhipster.lite.cli.error.domain.Assert;
 import tech.jhipster.lite.cli.error.domain.MissingMandatoryValueException;
+import tech.jhipster.lite.cli.infrastructure.secondary.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
-class RestModulesRepositoryTest {
+class ModuleDomainServiceTest {
 
   @Mock
   private RestTemplate restTemplate;
@@ -38,9 +29,11 @@ class RestModulesRepositoryTest {
   @InjectMocks
   private RestModulesRepository restModulesRepository = new RestModulesRepository();
 
+  private ModuleDomainService moduleDomainService = new ModuleDomainService(restModulesRepository);
+
   @Test
   void listModulesWhenServerIsBlankMustThrowException(){
-    assertThatThrownBy(() -> restModulesRepository.list(""))
+    assertThatThrownBy(() -> moduleDomainService.list(""))
       .isExactlyInstanceOf(MissingMandatoryValueException.class)
       .hasMessageContaining("\"server\"");
   }
@@ -49,14 +42,14 @@ class RestModulesRepositoryTest {
     RestModules response = getRestModules();
     Mockito.when( restTemplate.getForEntity("http://localhost:7471/api/modules", RestModules.class)).thenReturn(new ResponseEntity<>(response, HttpStatus.OK));
 
-    assertThat(restModulesRepository.list("http://localhost:7471")).isEqualTo(response.toDomain());
+    assertThat(moduleDomainService.list("http://localhost:7471")).isEqualTo(response.toDomain());
   }
   @Test
   void shouldNotListModules(){
     RestModules response = getRestModules();
     Mockito.when( restTemplate.getForEntity("http://localhost:7471/api/modules", RestModules.class)).thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
 
-    assertThat(restModulesRepository.list("http://localhost:7471")).isNull();
+    assertThat(moduleDomainService.list("http://localhost:7471")).isNull();
   }
 
   @Test
@@ -75,7 +68,7 @@ class RestModulesRepositoryTest {
     Modules response = getRestModules().toDomain();
     Mockito.when( restTemplate.postForEntity(JhiCli.server + "/api/modules/postgresql/apply", request, Modules.class)).thenReturn(new ResponseEntity<>(response, HttpStatus.OK));
 
-    assertThat(restModulesRepository.apply(slug,modToApply)).isEqualTo(new ResponseEntity<>(response, HttpStatus.OK).toString());
+    assertThat(moduleDomainService.apply(slug,modToApply)).isEqualTo(new ResponseEntity<>(response, HttpStatus.OK).toString());
 
   }
 

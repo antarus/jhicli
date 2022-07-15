@@ -6,4 +6,7 @@ public record ModuleDescription(String description) {
   public ModuleDescription {
     Assert.field("description", description).notBlank();
   }
+  public String get(){
+    return description();
+  }
 }

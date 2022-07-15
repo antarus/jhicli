@@ -16,9 +16,6 @@ public class CompletionCommand implements Runnable {
   @CommandLine.Spec
   CommandLine.Model.CommandSpec spec;
 
-  public CompletionCommand() {
-  }
-
   public void run() {
     String script = AutoComplete.bash(this.spec.root().name(), this.spec.root().commandLine());
     this.spec.commandLine().getOut().print(script);

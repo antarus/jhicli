@@ -13,8 +13,7 @@ public record ModulePropertyExample(String example) {
   public static Optional<ModulePropertyExample> of(String example) {
     return Optional.ofNullable(example).filter(StringUtils::isNotBlank).map(ModulePropertyExample::new);
   }
-
-  public String get() {
+  public String get(){
     return example();
   }
 }

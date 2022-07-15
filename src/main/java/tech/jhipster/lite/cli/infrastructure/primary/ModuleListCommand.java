@@ -17,8 +17,9 @@ public class ModuleListCommand implements Callable<Integer> {
 
   @Override
   public Integer call() {
-
+    Output.printVerbose("Module from Server : " + JhiCli.server);
     var modules= cli.getModuleService().list(JhiCli.server);
+
     modules.listModules().forEach(Output::printMessage);
 
     return 0;

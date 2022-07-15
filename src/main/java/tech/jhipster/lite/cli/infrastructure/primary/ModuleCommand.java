@@ -22,7 +22,7 @@ public class ModuleCommand implements Callable<Integer> {
   @Override
   public Integer call() {
     Output.printError("Choose a subcommand.");
-    spec.commandLine().usage(System.out);
+    Output.printUsage(spec);
     return 1;
   }
 

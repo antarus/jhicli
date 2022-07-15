@@ -13,8 +13,7 @@ public record ModulePropertyDescription(String description) {
   public static Optional<ModulePropertyDescription> of(String description) {
     return Optional.ofNullable(description).filter(StringUtils::isNotBlank).map(ModulePropertyDescription::new);
   }
-
-  public String get() {
+  public String get(){
     return description();
   }
 }
